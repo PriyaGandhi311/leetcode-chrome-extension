@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "LeetCode Reminder",
+    "version": "0.0.1",
+    "description": "Email reminders for LeetCode problems you solved.",
+    "actions":{
+        "default_title": "LeetCode Reminder",
+        "default_popup" : "popup.html"
+    },
+    "options_page": "options.html",
+    "permissions": ["storage", "activeTab"],
+    "host_permissions": [
+        "https://localhost:8000/*",
+        "Add own domain later" 
+    ],
+    "background": {
+        "service_worker": "src/background/background.ts",
+        "type": "module"
+    }
+}
