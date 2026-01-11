@@ -8,6 +8,8 @@ from backend.db.models import User
 from backend.core.config import settings
 from backend.core.security import hash_password, verify_password, create_access_token
 
+from typing import List
+
 router = APIRouter()
 
 class SignupRequest(BaseModel):
@@ -93,3 +95,9 @@ def me(
     token = extract_bearer_token(authorization)
     user = get_current_user_from_token(token, db)
     return MeResponse(id=user.id, email=user.email)
+
+# DEV ONLY: list all users
+@router.get("/_debug/users", response_model=List[MeResponse])
+def debug_list_users(db: Session = Depends(get_db)):
+    users = db.query(User).order_by(User.id.asc()).all()
+    return [MeResponse(id=u.id, email=u.email) for u in users]
