@@ -1,0 +1,35 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+*.log
+
+# ---- FastAPI / Uvicorn ----
+*.pid
+
+# ---- Env / Secrets ----
+.env
+.env.*
+*.pem
+*.key
+
+# ---- Database / local data ----
+*.sqlite3
+*.db
+
+# ---- Docker ----
+docker-compose.override.yml
