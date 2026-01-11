@@ -33,3 +33,10 @@ pip-wheel-metadata/
 
 # ---- Docker ----
 docker-compose.override.yml
+
+# ---- OS / Editor ----
+.DS_Store
+.vscode/
+
+# ---- Root Miscellany ----
+/package-lock.json
