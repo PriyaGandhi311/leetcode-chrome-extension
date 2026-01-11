@@ -1,35 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { AuthForm } from './components/AuthForm';
+import { getAuthToken, clearAuth } from './utils/storage';
+import { authAPI } from './api/authService';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await getAuthToken();
+      if (token) {
+        const isValid = await authAPI.getMe(token);
+        setIsAuthenticated(isValid);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) return <div>Loading...</div>;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="popup-container">
+      {isAuthenticated ? (
+        <div>
+          <h1>LeetCode Reminders</h1>
+          <button className="bg-green-500 p-2 text-white">Save This Problem</button>
+          <button onClick={() => { clearAuth(); setIsAuthenticated(false); }}>Logout</button>
+        </div>
+      ) : (
+        <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
+      )}
+    </div>
+  );
 }
-
-export default App
+export default App;

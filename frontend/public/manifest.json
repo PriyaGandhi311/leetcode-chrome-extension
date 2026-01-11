@@ -3,7 +3,7 @@
     "name": "LeetCode Reminder",
     "version": "0.0.1",
     "description": "Email reminders for LeetCode problems you solved.",
-    "actions":{
+    "action":{
         "default_title": "LeetCode Reminder",
         "default_popup" : "popup.html"
     },
@@ -14,7 +14,7 @@
         "Add own domain later" 
     ],
     "background": {
-        "service_worker": "src/background/background.ts",
+        "service_worker": "background.js",
         "type": "module"
     }
 }
