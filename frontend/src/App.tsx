@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AuthForm } from './components/AuthForm';
+import { Dashboard } from './components/Dashboard';
 import { getAuthToken, clearAuth } from './utils/storage';
 import { authAPI } from './api/authService';
 
@@ -26,7 +27,7 @@ function App() {
       {isAuthenticated ? (
         <div>
           <h1>LeetCode Reminders</h1>
-          <button className="bg-green-500 p-2 text-white">Save This Problem</button>
+          <Dashboard />
           <button onClick={() => { clearAuth(); setIsAuthenticated(false); }}>Logout</button>
         </div>
       ) : (
