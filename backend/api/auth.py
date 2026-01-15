@@ -12,13 +12,9 @@ from typing import List
 
 router = APIRouter()
 
-class SignupRequest(BaseModel):
+class LoginOrSignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=1, max_length=128)
 
 class AuthResponse(BaseModel):
     access_token: str
@@ -58,7 +54,7 @@ def get_current_user_from_token(token: str, db: Session) -> User:
     return user
 
 @router.post("/signup", response_model=MeResponse)
-def signup(payload: SignupRequest, db: Session = Depends(get_db)):
+def signup(payload: LoginOrSignupRequest, db: Session = Depends(get_db)):
     email = str(payload.email).lower()
     if get_user_by_email(db, email):
         raise HTTPException(status_code=409, detail="Email already registered")
@@ -70,7 +66,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     return MeResponse(id=user.id, email=user.email)
 
 @router.post("/login", response_model=AuthResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+def login(payload: LoginOrSignupRequest, db: Session = Depends(get_db)):
     email = str(payload.email).lower()
     user = get_user_by_email(db, email)
 
