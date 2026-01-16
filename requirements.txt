@@ -10,3 +10,7 @@ pydantic[email]
 bcrypt==4.0.1
 passlib[bcrypt]
 python-jose[cryptography]
+
+celery
+redis
+python-dotenv
