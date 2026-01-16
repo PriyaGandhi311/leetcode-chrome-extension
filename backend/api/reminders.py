@@ -9,10 +9,10 @@ from backend.api.deps import get_current_user
 from backend.db.session import get_db
 from backend.db.models import Reminder, User
 
-/*
+"""
     TODO: add docs/ swagger description for APIs
     For now have just commented the APIs
-*/
+"""
 
 router = APIRouter()
 
