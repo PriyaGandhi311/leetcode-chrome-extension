@@ -28,12 +28,16 @@ def _assert_utc(dt: datetime) -> datetime:
 class ReminderCreate(BaseModel):
     send_at_utc: datetime
     question_url: HttpUrl
+    leetcode_problem_name: str
+    leetcode_problem_number: int
 
 # json response schema for a reminder
 class ReminderOut(BaseModel):
     id: int
     send_at_utc: datetime
     question_url: HttpUrl
+    leetcode_problem_name: str
+    leetcode_problem_number: int
     is_active: bool
     sent_at: datetime | None
 
@@ -54,6 +58,8 @@ def create_reminder(
         user_id=user.id,
         send_at_utc=send_at,
         question_url=str(payload.question_url),
+        leetcode_problem_name=payload.leetcode_problem_name,
+        leetcode_problem_number=payload.leetcode_problem_number,
         is_active=True,
         sent_at=None,
     )
@@ -65,6 +71,8 @@ def create_reminder(
         id=r.id,
         send_at_utc=r.send_at_utc,
         question_url=r.question_url,
+        leetcode_problem_name=r.leetcode_problem_name,
+        leetcode_problem_number=r.leetcode_problem_number,
         is_active=r.is_active,
         sent_at=r.sent_at,
     )
@@ -87,6 +95,8 @@ def list_reminders(
             id=r.id,
             send_at_utc=r.send_at_utc,
             question_url=r.question_url,
+            leetcode_problem_name=r.leetcode_problem_name,
+            leetcode_problem_number=r.leetcode_problem_number,
             is_active=r.is_active,
             sent_at=r.sent_at,
         )
