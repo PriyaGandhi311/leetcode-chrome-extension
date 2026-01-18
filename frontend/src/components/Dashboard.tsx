@@ -1,85 +1,143 @@
 import { useState, useEffect } from 'react';
 import { getActiveLeetCodeTab } from '../utils/tabs';
+import { getAuthToken } from '../utils/storage';
+import { authAPI } from '../api/authService';
+import { ReminderHistory } from './ReminderHistory';
+import type { Reminder, LeetCodeProblem } from '../types';
 
-export function Dashboard(){
-    const [problem, setProblem] = useState<{title: string; url : string} | null>(null);
+export function Dashboard() {
+    const [view, setView] = useState<'schedule' | 'history'>('schedule');
+    const [problem, setProblem] = useState<LeetCodeProblem | null>(null);
     const [reminderDays, setReminderDays] = useState<number[]>([7, 20]);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
-        fetchCurrentLeetCodeProblem();
+        const init = async () => {
+            try {
+                const activeTab = await getActiveLeetCodeTab();
+                if (activeTab) setProblem(activeTab);
+            } catch (err) {
+                console.error("Tab fetch error", err);
+            }
+        };
+        init();
     }, []);
 
-    const fetchCurrentLeetCodeProblem = async () => {
-        const activeTab = await getActiveLeetCodeTab();
-        if(activeTab){
-            setProblem(activeTab);
+    const handleSwitchView = async () => {
+        const nextView = view === 'schedule' ? 'history' : 'schedule';
+        setView(nextView);
+        
+        if (nextView === 'history') {
+            setLoading(true);
+            setMessage("");
+            try {
+                const token = await getAuthToken();
+                if (!token) throw new Error("Unauthorized");
+                const data = await authAPI.getAllRemindersByUser(token);
+                setReminders(data);
+            } catch (err: any) {
+                setMessage(err.message || "Load error");
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    const toggleDay = (day: number) => {
-        setReminderDays(prev => 
-            prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-        );
-    };
-
-    const handleSave = async () => {
-        if (!problem) return;
+    const handleSaveReminders = async () => {
+        if (loading || !problem) return;
         setLoading(true);
+        setMessage("");
+
         try {
-        // Logic to call your FastAPI endpoint (e.g., authAPI.saveProblem)
-            console.log("Saving problem:", problem.title, "with days:", reminderDays);
-            setMessage("Saved successfully!");
-        } catch (err) {
-            setMessage("Failed to save.");
+            const token = await getAuthToken();
+            const requests = reminderDays.map(days => {
+                const date = new Date();
+                date.setDate(date.getDate() + days);
+                return authAPI.createReminder(token!, {
+                    send_at_utc: date.toISOString(),
+                    question_url: problem.url
+                });
+            });
+
+            await Promise.all(requests);
+            setMessage("Reminders saved");
+            setReminderDays([]);
+        } catch (err: any) {
+            setMessage("Save failed");
         } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteReminder = async (id: number) => {
+        try {
+            const token = await getAuthToken();
+            await authAPI.deleteReminder(token!, id);
+            setReminders(prev => prev.filter(r => r.id !== id));
+            setMessage("Deleted");
+            setTimeout(() => setMessage(""), 2000);
+        } catch (err) {
+            setMessage("Delete failed");
+        }
+    };
+
     return (
-        <div className="flex flex-col gap-4 p-2">
-        {problem ? (
-            <>
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                <p className="text-xs text-blue-600 font-bold uppercase">Current Problem</p>
-                <h2 className="text-sm font-semibold truncate">{problem.title}</h2>
+        <div className="p-4 w-80">
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-sm font-bold">LEETREMIND</h1>
+                <button 
+                    onClick={handleSwitchView}
+                    className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
+                >
+                    {view === 'schedule' ? "History" : "Back"}
+                </button>
             </div>
 
-            <div>
-                <p className="text-xs font-medium mb-2 text-gray-600">Remind me in:</p>
-                <div className="flex gap-2">
-                {[1, 7, 20, 30].map((day) => (
-                    <button
-                    key={day}
-                    onClick={() => toggleDay(day)}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                        reminderDays.includes(day) 
-                        ? 'bg-black text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                    >
-                    {day}d
-                    </button>
-                ))}
+            {view === 'schedule' ? (
+                <div className="space-y-4">
+                    {problem ? (
+                        <>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <p className="text-xs font-semibold truncate">{problem.title}</p>
+                            </div>
+                            <div className="flex gap-2">
+                                {[1, 7, 20, 30].map(day => (
+                                    <button 
+                                        key={day}
+                                        onClick={() => setReminderDays(prev => 
+                                            prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+                                        )}
+                                        className={`flex-1 py-1 text-xs border rounded ${
+                                            reminderDays.includes(day) ? 'bg-blue-600 text-white' : ''
+                                        }`}
+                                    >
+                                        {day}d
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleSaveReminders}
+                                disabled={loading || reminderDays.length === 0}
+                                className="w-full py-2 bg-green-600 text-white text-xs font-bold rounded disabled:bg-gray-300"
+                            >
+                                {loading ? "Saving..." : "Confirm"}
+                            </button>
+                        </>
+                    ) : (
+                        <p className="text-xs text-gray-500">No problem detected.</p>
+                    )}
                 </div>
-            </div>
+            ) : (
+                <ReminderHistory 
+                    reminders={reminders} 
+                    loading={loading} 
+                    onDelete={handleDeleteReminder} 
+                />
+            )}
 
-            <button
-                onClick={handleSave}
-                disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-bold text-sm transition-all"
-            >
-                {loading ? "Saving..." : "Set Reminder"}
-            </button>
-            </>
-        ) : (
-            <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-sm text-gray-500">Please open a LeetCode problem page to set a reminder.</p>
-            </div>
-        )}
-        {message && <p className="text-center text-xs font-medium text-blue-500 mt-2">{message}</p>}
+            {message && <p className="mt-4 text-center text-xs font-bold">{message}</p>}
         </div>
     );
-
 }
