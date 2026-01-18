@@ -16,8 +16,8 @@ export function Dashboard() {
     useEffect(() => {
         const init = async () => {
             try {
-                const activeTab = await getActiveLeetCodeTab();
-                if (activeTab) setProblem(activeTab);
+                const activeTabDetails = await getActiveLeetCodeTab();
+                if (activeTabDetails) setProblem(activeTabDetails);
             } catch (err) {
                 console.error("Tab fetch error", err);
             }
@@ -57,7 +57,9 @@ export function Dashboard() {
                 date.setDate(date.getDate() + days);
                 return authAPI.createReminder(token!, {
                     send_at_utc: date.toISOString(),
-                    question_url: problem.url
+                    question_url: problem.leetcode_problem_url,
+                    leetcode_problem_name: problem.leetcode_problem_title,
+                    leetcode_problem_number: problem.leetcode_problem_number
                 });
             });
 
@@ -86,7 +88,7 @@ export function Dashboard() {
     return (
         <div className="p-4 w-80">
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-sm font-bold">LEETREMIND</h1>
+                <h1 className="text-sm font-bold">LEET REMIND</h1>
                 <button 
                     onClick={handleSwitchView}
                     className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
@@ -100,7 +102,7 @@ export function Dashboard() {
                     {problem ? (
                         <>
                             <div className="p-2 bg-gray-100 rounded">
-                                <p className="text-xs font-semibold truncate">{problem.title}</p>
+                                <p className="text-xs font-semibold truncate">{problem.leetcode_problem_title}</p>
                             </div>
                             <div className="flex gap-2">
                                 {[1, 7, 20, 30].map(day => (

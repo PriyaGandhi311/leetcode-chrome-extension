@@ -8,6 +8,7 @@ export interface Reminder {
 }
 
 export interface LeetCodeProblem {
-    title: string;
-    url: string;
+    leetcode_problem_number: number;
+    leetcode_problem_title: string;
+    leetcode_problem_url: string;
 }

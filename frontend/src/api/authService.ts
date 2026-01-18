@@ -27,7 +27,7 @@ export const authAPI = {
     return res.ok;
   },
 
-  createReminder: async (token: string, payload : {send_at_utc: string; question_url: string}) => {
+  createReminder: async (token: string, payload : {send_at_utc: string; question_url: string; leetcode_problem_name: string; leetcode_problem_number: number}) => {
     console.log("Reminder created successfully",`Bearer ${token}`);
     const response = await fetch(`${BASE_URL}/reminders`,{
       method: "POST",
