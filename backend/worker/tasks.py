@@ -38,7 +38,10 @@ def dispatch_due_reminders():
                 continue
 
             subject = "LeetCode Reminder"
-            body = f"Time to solve a problem:\n\n{r.question_url}\n"
+            body = (
+                f"Time to solve LeetCode #{r.leetcode_problem_number}: {r.leetcode_problem_name}\n\n"
+                f"{r.question_url}\n"
+            )
 
             send_email(to_email=user.email, subject=subject, body=body)
 

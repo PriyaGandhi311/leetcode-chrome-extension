@@ -27,6 +27,8 @@ class Reminder(Base):
     # Frontend sends UTC; backend asserts it is UTC and stores as-is
     send_at_utc: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
     question_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    leetcode_problem_name: Mapped[str] = mapped_column(String(512), nullable=False)
+    leetcode_problem_number: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
