@@ -68,7 +68,7 @@ export const authAPI = {
   },
 
   deleteReminder: async (token: string, reminderId: number) => {
-    const response = await fetch(`${BASE_URL}/${reminderId}`, {
+    const response = await fetch(`${BASE_URL}/reminders/${reminderId}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,

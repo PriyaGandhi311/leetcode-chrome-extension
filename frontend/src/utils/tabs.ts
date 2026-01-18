@@ -14,7 +14,7 @@ export const getActiveLeetCodeTab = async (): Promise<LeetCodeProblem | null> =>
                 const el = document.querySelector('div[class*="text-title-large"]');
                 if (!el) return null;
 
-                const fullText = (el as HTMLElement).innerText; // e.g., "1. Two Sum"
+                const fullText = (el as HTMLElement).innerText; 
                 const parts = fullText.split('.');
                 
                 return {
