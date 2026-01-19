@@ -17,6 +17,7 @@ build/
 *.egg-info/
 pip-wheel-metadata/
 *.log
+celerybeat-schedule
 
 # ---- FastAPI / Uvicorn ----
 *.pid
