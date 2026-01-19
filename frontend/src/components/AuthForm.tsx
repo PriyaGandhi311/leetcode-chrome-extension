@@ -6,80 +6,81 @@ export const AuthForm = ({ onAuthSuccess }: { onAuthSuccess: () => void }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // New: loading state
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (isLogin) {
-        // LOGIN FLOW
         const data = await authAPI.login(email, password);
         await setAuthToken(data.access_token);
-        // This triggers the parent (App.tsx) to switch to <Dashboard />
-        onAuthSuccess(); 
+        onAuthSuccess();
       } else {
-        // SIGNUP FLOW
         await authAPI.signup(email, password);
-        alert("Account created! Now please log in with your credentials.");
-        
-        // Reset fields for security/clarity
-        setPassword(''); 
-        setIsLogin(true); // Redirect to login view
+        alert("Account created! Now please log in.");
+        setPassword('');
+        setIsLogin(true);
       }
     } catch (err) {
-      alert("Authentication failed. Please check your details or connection.");
+      alert("Authentication failed.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 w-72 bg-white">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">
-          {isLogin ? 'Welcome Back' : 'Join Us'}
+    <div className="w-full max-w-sm">
+      <div className="mb-8 text-center">
+        <h2 className="text-xl font-medium text-gray-900 tracking-tight mb-2">
+          {isLogin ? 'Welcome back' : 'Join LeetRemind'}
         </h2>
-        <p className="text-xs text-gray-500 mt-1">
-          {isLogin ? 'Log in to manage your reminders' : 'Start your spaced-repetition journey'}
+        <p className="text-sm text-gray-500">
+          {isLogin ? 'Enter your details to access your reminders' : 'Start your spaced-repetition journey'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input 
-          type="email" 
-          placeholder="Email Address" 
-          required
-          className="border border-gray-200 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-black" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} 
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          required
-          className="border border-gray-200 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-black" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)} 
-        />
-        <button 
-          type="submit" 
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Email</label>
+          <input
+            type="email"
+            placeholder="hello@example.com"
+            required
+            className="w-full px-3 py-2 bg-white border border-gray-200 rounded text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-colors"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            required
+            className="w-full px-3 py-2 bg-white border border-gray-200 rounded text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-colors"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <button
+          type="submit"
           disabled={loading}
-          className={`bg-black text-white p-2.5 rounded-md font-bold transition-all ${loading ? 'opacity-50' : 'hover:bg-gray-800'}`}
+          className="w-full bg-gray-900 text-white py-2 rounded text-sm font-medium hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
-          {loading ? 'Processing...' : isLogin ? 'Login' : 'Create Account'}
+          {loading ? 'Processing...' : isLogin ? 'Log in' : 'Sign up'}
         </button>
       </form>
 
-      <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-        <button 
+      <div className="mt-8 text-center">
+        <button
           onClick={() => {
             setIsLogin(!isLogin);
-            setPassword(''); // Clear password when toggling
+            setPassword('');
           }}
-          className="text-xs font-semibold text-gray-400 hover:text-black transition-colors"
+          className="text-xs text-gray-500 hover:text-gray-900 transition-colors underline underline-offset-2"
         >
-          {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+          {isLogin ? "New here? Create an account" : "Already have an account? Log in"}
         </button>
       </div>
     </div>

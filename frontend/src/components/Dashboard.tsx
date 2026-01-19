@@ -8,7 +8,7 @@ import type { Reminder, LeetCodeProblem } from '../types';
 export function Dashboard() {
     const [view, setView] = useState<'schedule' | 'history'>('schedule');
     const [problem, setProblem] = useState<LeetCodeProblem | null>(null);
-    const [reminderDays, setReminderDays] = useState<number[]>([7, 20]);
+    const [reminderDays, setReminderDays] = useState<number[]>([]);
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -28,7 +28,7 @@ export function Dashboard() {
     const handleSwitchView = async () => {
         const nextView = view === 'schedule' ? 'history' : 'schedule';
         setView(nextView);
-        
+
         if (nextView === 'history') {
             setLoading(true);
             setMessage("");
@@ -64,7 +64,7 @@ export function Dashboard() {
             });
 
             await Promise.all(requests);
-            setMessage("Reminders saved");
+            setMessage("Saved successfully");
             setReminderDays([]);
         } catch (err: any) {
             setMessage("Save failed");
@@ -86,60 +86,79 @@ export function Dashboard() {
     };
 
     return (
-        <div className="p-4 w-80">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-sm font-bold">LEET REMIND</h1>
-                <button 
+        <div className="p-4 w-full">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {view === 'schedule' ? "New Reminder" : "History"}
+                    </span>
+                </div>
+                <button
                     onClick={handleSwitchView}
-                    className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
+                    className="text-xs font-medium text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-all border border-transparent hover:border-gray-200"
                 >
-                    {view === 'schedule' ? "History" : "Back"}
+                    {view === 'schedule' ? "View History" : "New Reminder"}
                 </button>
             </div>
 
             {view === 'schedule' ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {problem ? (
                         <>
-                            <div className="p-2 bg-gray-100 rounded">
-                                <p className="text-xs font-semibold truncate">{problem.leetcode_problem_title}</p>
+                            <div className="p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                                <span className="text-[10px] uppercase font-bold text-gray-400 mb-1 block tracking-wider">Current Problem</span>
+                                <p className="text-sm font-medium text-gray-900 truncate leading-tight">{problem.leetcode_problem_title}</p>
                             </div>
-                            <div className="flex gap-2">
-                                {[1, 7, 20, 30].map(day => (
-                                    <button 
-                                        key={day}
-                                        onClick={() => setReminderDays(prev => 
-                                            prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-                                        )}
-                                        className={`flex-1 py-1 text-xs border rounded ${
-                                            reminderDays.includes(day) ? 'bg-blue-600 text-white' : ''
-                                        }`}
-                                    >
-                                        {day}d
-                                    </button>
-                                ))}
+
+                            <div>
+                                <span className="text-[10px] uppercase font-bold text-gray-400 mb-2 block tracking-wider">Remind me in</span>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {[1, 3, 7, 14, 20, 30].slice(0, 4).map(day => (
+                                        <button
+                                            key={day}
+                                            onClick={() => setReminderDays(prev =>
+                                                prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+                                            )}
+                                            className={`text-xs py-2 rounded-md font-medium transition-all ${reminderDays.includes(day)
+                                                ? 'bg-black text-white shadow-sm'
+                                                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {day}d
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
+
                             <button
                                 onClick={handleSaveReminders}
                                 disabled={loading || reminderDays.length === 0}
-                                className="w-full py-2 bg-green-600 text-white text-xs font-bold rounded disabled:bg-gray-300"
+                                className="w-full py-2.5 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
                             >
-                                {loading ? "Saving..." : "Confirm"}
+                                {loading ? "Scheduling..." : "Save Reminders"}
                             </button>
                         </>
                     ) : (
-                        <p className="text-xs text-gray-500">No problem detected.</p>
+                        <div className="p-8 bg-gray-50 rounded-lg border border-dashed border-gray-200 text-center">
+                            <p className="text-sm text-gray-500 mb-1">No active LeetCode problem found.</p>
+                            <p className="text-xs text-gray-400">Open a problem page to set a reminder.</p>
+                        </div>
                     )}
                 </div>
             ) : (
-                <ReminderHistory 
-                    reminders={reminders} 
-                    loading={loading} 
-                    onDelete={handleDeleteReminder} 
+                <ReminderHistory
+                    reminders={reminders}
+                    loading={loading}
+                    onDelete={handleDeleteReminder}
                 />
             )}
 
-            {message && <p className="mt-4 text-center text-xs font-bold">{message}</p>}
+            {message && (
+                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1.5 rounded-full shadow-lg z-50 animate-fade-in-up">
+                    {message}
+                </div>
+            )}
         </div>
     );
 }

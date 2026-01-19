@@ -3,6 +3,8 @@ export interface Reminder {
     id: number;
     send_at_utc: string;
     question_url: string;
+    leetcode_problem_name: string;
+    leetcode_problem_number: number;
     is_active: boolean;
     sent_at: string | null;
 }

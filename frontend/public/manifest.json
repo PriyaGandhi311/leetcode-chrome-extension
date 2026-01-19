@@ -3,15 +3,19 @@
     "name": "LeetCode Reminder",
     "version": "0.0.1",
     "description": "Email reminders for LeetCode problems you solved.",
-    "action":{
+    "action": {
         "default_title": "LeetCode Reminder",
-        "default_popup" : "popup.html"
+        "default_popup": "popup.html"
     },
     "options_page": "options.html",
-    "permissions": ["storage", "activeTab", "scripting"],
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
     "host_permissions": [
-        "https://localhost:8000/*",
-        "Add own domain later" 
+        "http://localhost:8000/*",
+        "Add own domain later"
     ],
     "background": {
         "service_worker": "background.js",
