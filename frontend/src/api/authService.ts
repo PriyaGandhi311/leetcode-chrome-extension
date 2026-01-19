@@ -17,7 +17,7 @@ export const authAPI = {
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) throw new Error("Invalid credentials");
-    return res.json(); // Should return { access_token: "..." }
+    return res.json(); 
   },
 
   getMe: async (token: string) => {

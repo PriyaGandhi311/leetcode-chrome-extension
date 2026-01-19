@@ -41,8 +41,6 @@ export function Dashboard() {
             if (isNaN(days) || days <= 0) return "";
             targetDate.setDate(targetDate.getDate() + days);
         } else {
-            // Create date from "YYYY-MM-DD" string
-            // Using the parts avoids the local timezone "day-shifter" bug
             const [year, month, day] = customValue.value.split('-').map(Number);
             targetDate = new Date(Date.UTC(year, month - 1, day));
         }
@@ -96,17 +94,8 @@ export function Dashboard() {
                     d.setDate(d.getDate() + parseInt(customValue.value));
                     finalDates.push(d.toISOString());
                 } else {
-                    // 1. Split the string
                     const [year, month, day] = customValue.value.split('-').map(Number);
-                    
-                    // 2. Create the date at 12:00 PM (Noon) UTC instead of 00:00
-                    // Date.UTC(year, month, day, hours)
                     const utcDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-                    
-                    // 3. Log this to your console to verify before saving
-                    console.log("Saving Date:", utcDate.toISOString()); 
-                    // Should show: "2026-01-21T12:00:00.000Z"
-                    
                     finalDates.push(utcDate.toISOString());
                 }
             }
@@ -148,7 +137,7 @@ export function Dashboard() {
 
     return (
         <div className="p-4 w-full bg-white min-h-[300px]">
-            {/* Header */}
+            
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
