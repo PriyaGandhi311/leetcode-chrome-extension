@@ -1,35 +1,24 @@
-import { useEffect, useState } from 'react';
-import { AuthForm } from './components/AuthForm';
-import { Dashboard } from './components/Dashboard';
-import { getAuthToken, clearAuth } from './utils/storage';
-import { authAPI } from './api/authService';
+import { ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/chrome-extension";
+import { AuthForm } from "./components/AuthForm";
+import { Dashboard } from "./components/Dashboard";
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+const PUBLISHABLE_KEY = "pk_test_bGVnYWwtZG92ZS05Ni5jbGVyay5hY2NvdW50cy5kZXYk"; 
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await getAuthToken();
-      if (token) {
-        const isValid = await authAPI.getMe(token);
-        setIsAuthenticated(isValid);
-      } else {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
 
-  if (isAuthenticated === null) return <div>Loading...</div>;
+function AppContent() {
+  const { signOut } = useAuth();
 
   return (
     <div className="min-w-[350px] min-h-[500px] bg-white text-gray-900 font-sans">
-      {isAuthenticated ? (
+      <SignedIn>
         <div className="flex flex-col h-full">
           <header className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
             <h1 className="text-sm font-semibold tracking-tight">LeetCode Reminders</h1>
             <button
-              onClick={() => { clearAuth(); setIsAuthenticated(false); }}
+              onClick={() => signOut()}
               className="text-xs text-gray-500 hover:text-gray-900 transition-colors px-2 py-1 rounded hover:bg-gray-100"
             >
               Logout
@@ -39,12 +28,25 @@ function App() {
             <Dashboard />
           </div>
         </div>
-      ) : (
+      </SignedIn>
+
+      <SignedOut>
         <div className="h-full flex flex-col items-center justify-center p-6">
-          <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
+          <AuthForm />
         </div>
-      )}
+      </SignedOut>
     </div>
   );
 }
-export default App;
+
+export default function App() {
+  return (
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY}
+      routerPush={(to) => window.location.hash = to}
+      routerReplace={(to) => window.location.hash = to}
+    >
+      <AppContent />
+    </ClerkProvider>
+  );
+}

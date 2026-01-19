@@ -1,31 +1,31 @@
 const BASE_URL = "http://localhost:8000/v1";
 
 export const authAPI = {
-  signup: async (email: any, password: any) => {
-    const res = await fetch(`${BASE_URL}/auth/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    return res.json();
-  },
+  // signup: async (email: any, password: any) => {
+  //   const res = await fetch(`${BASE_URL}/auth/signup`, {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ email, password }),
+  //   });
+  //   return res.json();
+  // },
 
-  login: async (email: any, password: any) => {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) throw new Error("Invalid credentials");
-    return res.json(); 
-  },
+  // login: async (email: any, password: any) => {
+  //   const res = await fetch(`${BASE_URL}/auth/login`, {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ email, password }),
+  //   });
+  //   if (!res.ok) throw new Error("Invalid credentials");
+  //   return res.json(); 
+  // },
 
-  getMe: async (token: string) => {
-    const res = await fetch(`${BASE_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.ok;
-  },
+  // getMe: async (token: string) => {
+  //   const res = await fetch(`${BASE_URL}/auth/me`, {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   });
+  //   return res.ok;
+  // },
 
   createReminder: async (token: string, payload: { send_at_utc: string; question_url: string; leetcode_problem_name: string; leetcode_problem_number: number }) => {
     console.log("Reminder created successfully", `Bearer ${token}`);

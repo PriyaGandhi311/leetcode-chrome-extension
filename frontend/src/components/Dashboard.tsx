@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getActiveLeetCodeTab } from '../utils/tabs';
-import { getAuthToken } from '../utils/storage';
+import { useAuth } from '@clerk/chrome-extension';;
 import { authAPI } from '../api/authService';
 import { ReminderHistory } from './ReminderHistory';
 import type { Reminder, LeetCodeProblem } from '../types';
+import { useUser } from '@clerk/chrome-extension';
 
 export function Dashboard() {
+    const { getToken } = useAuth()
     const [view, setView] = useState<'schedule' | 'history'>('schedule');
     const [problem, setProblem] = useState<LeetCodeProblem | null>(null);
     const [reminderDays, setReminderDays] = useState<number[]>([]);
@@ -17,7 +19,7 @@ export function Dashboard() {
         type: 'days',
         value: ''
     });
-
+    const { user } = useUser();
     useEffect(() => {
         const init = async () => {
             try {
@@ -61,7 +63,8 @@ export function Dashboard() {
             setLoading(true);
             setMessage("");
             try {
-                const token = await getAuthToken();
+                // const token = await getAuthToken();
+                const token = await getToken();
                 if (!token) throw new Error("Unauthorized");
                 const data = await authAPI.getAllRemindersByUser(token);
                 setReminders(data);
@@ -79,7 +82,8 @@ export function Dashboard() {
         setMessage("");
 
         try {
-            const token = await getAuthToken();
+            // const token = await getAuthToken();
+            const token = await getToken();
             if (!token) throw new Error("No auth token found");
 
             let finalDates: string[] = reminderDays.map(days => {
@@ -123,7 +127,8 @@ export function Dashboard() {
 
     const handleDeleteReminder = async (id: number) => {
         try {
-            const token = await getAuthToken();
+            // const token = await getAuthToken();
+            const token = await getToken();
             await authAPI.deleteReminder(token!, id);
             setReminders(prev => prev.filter(r => r.id !== id));
             setMessage("Deleted");
@@ -139,6 +144,7 @@ export function Dashboard() {
         <div className="p-4 w-full bg-white min-h-[300px]">
             
             <div className="flex justify-between items-center mb-6">
+                <div> Welcome {user?.firstName} !</div>
                 <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">

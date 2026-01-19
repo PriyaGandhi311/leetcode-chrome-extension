@@ -15,12 +15,15 @@
     },
     "options_page": "options.html",
     "permissions": [
+        "identity",
+        "cookies",
         "storage",
         "activeTab",
         "scripting"
     ],
     "host_permissions": [
         "http://localhost:8000/*",
+        "https://*.clerk.accounts.dev/*",
         "Add own domain later"
     ],
     "background": {
