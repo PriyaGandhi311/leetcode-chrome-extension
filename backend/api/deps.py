@@ -1,32 +1,57 @@
-from fastapi import Depends, Header, HTTPException
-from jose import JWTError, jwt
+import os
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from clerk_backend_api import Clerk
+from clerk_backend_api.models import AuthenticateRequestOptions
 
-from backend.core.config import settings
 from backend.db.session import get_db
 from backend.db.models import User
 
-def extract_bearer_token(authorization: str | None) -> str:
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Missing Authorization header")
-    parts = authorization.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Invalid Authorization header")
-    return parts[1].strip()
+# Initialize the Security helper and Clerk Client
+security = HTTPBearer()
 
-def get_current_user(authorization: str | None = Header(default=None), db: Session = Depends(get_db)) -> User:
-    token = extract_bearer_token(authorization)
+# IMPORTANT: Ensure your .env has CLERK_SECRET_KEY (no VITE_ prefix here)
+clerk_client = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
 
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    1. Extracts the Bearer token from the request header.
+    2. Validates it with Clerk.
+    3. Finds or creates the user in the local database.
+    """
+    token = credentials.credentials
+    
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_alg])
-        sub = payload.get("sub")
-        if not sub:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        user_id = int(sub)
-    except (JWTError, ValueError):
-        raise HTTPException(status_code=401, detail="Invalid token")
+        # Verify the token with Clerk's servers
+        request_state = clerk_client.authenticate_request(token=token)
+        
+        if not request_state.is_signed_in:
+             raise HTTPException(status_code=401, detail="Invalid session")
 
-    user = db.query(User).filter(User.id == user_id).one_or_none()
-    if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="User not found or inactive")
-    return user
+        clerk_id = request_state.payload.get("sub")
+
+        # Look for the user in our local LeetCode Reminder database
+        user = db.query(User).filter(User.clerk_id == clerk_id).first()
+        
+        # If user is logged into Clerk but doesn't exist in our DB yet (First time)
+        if not user:
+            # Fetch user details from Clerk to get the email
+            clerk_user = clerk_client.users.get(clerk_id)
+            email = clerk_user.email_addresses[0].email_address
+            
+            user = User(clerk_id=clerk_id, email=email)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            
+        return user
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Could not validate credentials: {str(e)}",
+        )
