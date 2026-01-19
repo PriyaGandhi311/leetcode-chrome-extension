@@ -53,3 +53,26 @@ def dispatch_due_reminders():
         return {"sent": sent_count}
     finally:
         db.close()
+
+
+@shared_task(name="backend.worker.tasks.cleanup_old_sent_reminders")
+def cleanup_old_sent_reminders(days: int = 30) -> dict:
+    db: Session = SessionLocal()
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+        deleted_count = (
+            db.query(Reminder)
+            .filter(
+                and_(
+                    Reminder.sent_at.isnot(None),
+                    Reminder.sent_at <= cutoff,
+                )
+            )
+            .delete(synchronize_session=False)
+        )
+
+        db.commit()
+        return {"deleted": deleted_count, "cutoff_utc": cutoff.isoformat()}
+    finally:
+        db.close()
