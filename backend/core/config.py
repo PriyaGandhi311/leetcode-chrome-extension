@@ -16,4 +16,12 @@ class Settings(BaseSettings):
     smtp_port: int = Field(default=1025, alias="SMTP_PORT")
     smtp_from_email: str = Field(default="noreply@leetcode-reminder.local", alias="SMTP_FROM_EMAIL")
 
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        url = self.database_url.strip().strip('"').strip("'")
+        # ensure psycopg3 driver prefix
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
+
 settings = Settings()
