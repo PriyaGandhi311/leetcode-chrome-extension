@@ -32,8 +32,7 @@ export function Dashboard() {
         init();
     }, []);
 
-    // Helper to calculate the preview date string
-    const getRelativePreview = () => {
+    const getRelativeDatePreview = () => {
         if (!customValue.value) return "";
         let targetDate: Date;
         
@@ -51,7 +50,7 @@ export function Dashboard() {
             weekday: 'long', 
             month: 'short', 
             day: 'numeric',
-            timeZone: 'UTC' // Force preview to show the UTC date
+            timeZone: 'UTC' 
         })} (UTC)`;
     };
 
@@ -63,7 +62,6 @@ export function Dashboard() {
             setLoading(true);
             setMessage("");
             try {
-                // const token = await getAuthToken();
                 const token = await getToken();
                 if (!token) throw new Error("Unauthorized");
                 const data = await authAPI.getAllRemindersByUser(token);
@@ -82,7 +80,6 @@ export function Dashboard() {
         setMessage("");
 
         try {
-            // const token = await getAuthToken();
             const token = await getToken();
             if (!token) throw new Error("No auth token found");
 
@@ -127,7 +124,6 @@ export function Dashboard() {
 
     const handleDeleteReminder = async (id: number) => {
         try {
-            // const token = await getAuthToken();
             const token = await getToken();
             await authAPI.deleteReminder(token!, id);
             setReminders(prev => prev.filter(r => r.id !== id));
@@ -229,7 +225,7 @@ export function Dashboard() {
 
                                         {customValue.value && (
                                             <p className="text-[10px] text-blue-600 font-medium italic animate-pulse">
-                                                {getRelativePreview()}
+                                                {getRelativeDatePreview()}
                                             </p>
                                         )}
                                     </div>

@@ -1,15 +1,23 @@
-import { ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/chrome-extension";
+import { ClerkProvider, SignedIn, SignedOut, useAuth, useUser } from "@clerk/chrome-extension";
 import { AuthForm } from "./components/AuthForm";
 import { Dashboard } from "./components/Dashboard";
 
-const PUBLISHABLE_KEY = "pk_test_bGVnYWwtZG92ZS05Ni5jbGVyay5hY2NvdW50cy5kZXYk"; 
-
+export const PUBLISHABLE_KEY = "pk_test_bGVnYWwtZG92ZS05Ni5jbGVyay5hY2NvdW50cy5kZXYk"; 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }
-
 function AppContent() {
   const { signOut } = useAuth();
+  const { isLoaded: authLoaded } = useAuth();
+  const { isLoaded: userLoaded } = useUser();
+
+  if (!authLoaded || !userLoaded) {
+    return (
+      <div className="min-w-[350px] min-h-[500px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-[350px] min-h-[500px] bg-white text-gray-900 font-sans">
@@ -43,6 +51,7 @@ export default function App() {
   return (
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY}
+      syncHost="https://legal-dove-96.clerk.accounts.dev"
       routerPush={(to) => window.location.hash = to}
       routerReplace={(to) => window.location.hash = to}
     >

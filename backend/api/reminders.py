@@ -5,8 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, HttpUrl
 from sqlalchemy.orm import Session
 
-# Import the new Clerk-based dependency
-from backend.api.deps import get_current_user
+from backend.api.authUtils import get_current_user
 from backend.db.session import get_db
 from backend.db.models import Reminder, User
 
@@ -46,12 +45,12 @@ class ReminderToggle(BaseModel):
 def create_reminder(
     payload: ReminderCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user), # Injected from Clerk token
+    user: User = Depends(get_current_user), 
 ):
     send_at = _assert_utc(payload.send_at_utc)
 
     r = Reminder(
-        user_id=user.id, # Uses the local DB integer ID found/created by Clerk
+        user_id=user.id, 
         send_at_utc=send_at,
         question_url=str(payload.question_url),
         leetcode_problem_name=payload.leetcode_problem_name,

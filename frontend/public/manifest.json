@@ -24,8 +24,13 @@
     "host_permissions": [
         "http://localhost:8000/*",
         "https://*.clerk.accounts.dev/*",
+        "https://legal-dove-96.clerk.accounts.dev/*",
+        "https://api.clerk.com/*",
         "Add own domain later"
     ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://legal-dove-96.clerk.accounts.dev https://api.clerk.com http://localhost:8000;"
+    },
     "background": {
         "service_worker": "background.js",
         "type": "module"
